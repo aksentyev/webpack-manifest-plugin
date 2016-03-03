@@ -1,23 +1,24 @@
 var path = require('path');
 var MemoryFileSystem = require("memory-fs");
-
+var fs = require('fs');
 var webpack = require('webpack');
 var _ = require('lodash');
 
 var plugin = require('../index.js');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var OUTPUT_DIR = path.join(__dirname, './webpack-out');
+var OUTPUT_DIR = path.join(__dirname, './webpack-out/');
 var manifestPath = path.join(OUTPUT_DIR, 'manifest.json');
 
 function webpackConfig (opts) {
+  options= opts.manifestOptions || {}
   return _.merge({
     output: {
       path: OUTPUT_DIR,
       filename: '[name].js'
     },
     plugins: [
-      new plugin(opts.manifestOptions)
+      new plugin(_.merge(options, { destPath: OUTPUT_DIR + '/' }))
     ]
   }, opts);
 }
@@ -33,11 +34,8 @@ function webpackCompile(opts, cb) {
 
   var compiler = webpack(config);
 
-  var fs = compiler.outputFileSystem = new MemoryFileSystem();
-
   compiler.run(function(err, stats){
     var manifestFile = JSON.parse( fs.readFileSync(manifestPath).toString() );
-
     expect(err).toBeFalsy();
     expect(stats.hasErrors()).toBe(false);
 
@@ -164,7 +162,7 @@ describe('ManifestPlugin', function() {
           }]
         },
         plugins: [
-          new plugin(),
+          new plugin({ destPath: OUTPUT_DIR + '/' }),
           new ExtractTextPlugin('[name].css', {
             allChunks: true
           })
