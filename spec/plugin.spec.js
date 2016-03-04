@@ -18,7 +18,7 @@ function webpackConfig (opts) {
       filename: '[name].js'
     },
     plugins: [
-      new plugin(_.merge(options, { destPath: OUTPUT_DIR + '/' }))
+      new plugin(_.merge(options, { destPath: OUTPUT_DIR }))
     ]
   }, opts);
 }
